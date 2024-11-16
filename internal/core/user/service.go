@@ -40,19 +40,16 @@ func (s *service) Transfer(ctx context.Context, transfer TransferDTO) error {
 		return errors.New("valor da transferência deve ser maior que zero")
 	}
 
-	// Calcular taxa de transferência
 	fee := transfer.Amount * TransferFeePercent
 	if fee < FixedTransferFee {
 		fee = FixedTransferFee
 	}
-	totalAmount := transfer.Amount + fee // Valor total a ser deduzido do remetente
+	totalAmount := transfer.Amount + fee
 
-	// Validar limite máximo
 	if totalAmount > MaxTransferLimit {
 		return errors.New("valor da transferência excede o limite permitido")
 	}
 
-	// Conversão de moedas, se necessário
 	if transfer.FromCurrency != transfer.ToCurrency {
 		convertedAmount, err := s.currencyService.Convert(ctx, transfer.Amount, transfer.FromCurrency, transfer.ToCurrency)
 		if err != nil {
@@ -61,28 +58,23 @@ func (s *service) Transfer(ctx context.Context, transfer TransferDTO) error {
 		transfer.Amount = convertedAmount
 	}
 
-	// Buscar o remetente
 	fromUser, err := s.repo.FindByID(ctx, transfer.FromID)
 	if err != nil || fromUser == nil {
 		return errors.New("usuário remetente não encontrado")
 	}
 
-	// Verificar saldo suficiente
 	if fromUser.Balance < totalAmount {
 		return errors.New("saldo insuficiente para cobrir o valor e a taxa")
 	}
 
-	// Buscar o destinatário
 	toUser, err := s.repo.FindByID(ctx, transfer.ToID)
 	if err != nil || toUser == nil {
 		return errors.New("usuário destinatário não encontrado")
 	}
 
-	// Atualizar os saldos
 	fromUser.Balance -= totalAmount
 	toUser.Balance += transfer.Amount
 
-	// Persistir as alterações no banco de dados
 	if err := s.repo.Update(ctx, fromUser); err != nil {
 		return errors.New("erro ao atualizar saldo do remetente")
 	}
