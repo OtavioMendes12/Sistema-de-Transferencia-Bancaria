@@ -20,8 +20,9 @@ func main() {
 	userRepo := db.NewUserRepository(cfg.Database, cfg.CollectionName)
 	currencyRepo := db.NewCurrencyRepository(cfg.Database, "CurrencyRates")
 	currencyService := currency.NewService(currencyRepo)
-	userService := user.NewService(userRepo, currencyService)
+
 	transferRepo := db.NewTransferRepository(cfg.Database, "TransferHistory")
+	userService := user.NewService(userRepo, currencyService, transferRepo)
 	transferService := transfer.NewService(transferRepo)
 	userHandler := &handlers.UserHandler{
 		Service:         userService,
