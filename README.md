@@ -101,8 +101,8 @@ go run cmd/main.go
 - **Body (JSON):**
   ```json
   {
-      "name": "Otávio Mendes",
-      "email": "otavio.mendes@example.com",
+      "name": "fulano Teste",
+      "email": "fulano.Teste@example.com",
       "balance": 1000.00
   }
   ```
@@ -139,8 +139,8 @@ go run cmd/main.go
   [
       {
           "id": "user1_id",
-          "name": "Otávio Mendes",
-          "email": "otavio.mendes@example.com",
+          "name": "fulano Teste",
+          "email": "fulano.teste@example.com",
           "balance": 1000.00
       }
   ]
