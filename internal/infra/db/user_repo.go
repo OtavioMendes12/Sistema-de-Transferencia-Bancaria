@@ -16,7 +16,6 @@ type userRepository struct {
 	collection *mongo.Collection
 }
 
-// NewUserRepository cria um repositório para usuários
 func NewUserRepository(database, collection string) user.Repository {
 	return &userRepository{
 		collection: GetCollection(database, collection),
@@ -51,7 +50,6 @@ func (r *userRepository) CreateUser(u *user.User) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	// Remova qualquer ID do usuário para evitar duplicatas
 	u.ID = ""
 
 	_, err := r.collection.InsertOne(ctx, u)
@@ -64,7 +62,7 @@ func (r *userRepository) CreateUser(u *user.User) error {
 
 func (r *userRepository) FindByID(ctx context.Context, id string) (*user.User, error) {
 	var u user.User
-	// Converter o ID para ObjectId
+
 	objectID, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
 		return nil, errors.New("ID inválido")
