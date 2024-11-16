@@ -3,6 +3,7 @@ module bank-transfer-system
 go 1.23.3
 
 require (
+	github.com/golang-jwt/jwt/v4 v4.5.1
 	github.com/gorilla/mux v1.8.1
 	github.com/spf13/viper v1.19.0
 	go.mongodb.org/mongo-driver v1.17.1

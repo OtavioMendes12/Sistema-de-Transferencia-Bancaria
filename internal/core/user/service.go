@@ -1,18 +1,22 @@
 package user
 
 import (
+	"bank-transfer-system/internal/core/currency"
 	"context"
 	"errors"
-	"log"
 )
 
 type service struct {
-	repo Repository
+	repo            Repository
+	currencyService currency.Service
 }
 
-// NewService cria uma nova instância do serviço e retorna como Service
-func NewService(repo Repository) Service {
-	return &service{repo: repo}
+// NewService cria um novo serviço de usuários
+func NewService(repo Repository, currencyService currency.Service) Service {
+	return &service{
+		repo:            repo,
+		currencyService: currencyService,
+	}
 }
 
 // GetUsers retorna todos os usuários
@@ -25,11 +29,23 @@ func (s *service) AddUser(user *User) error {
 	return s.repo.CreateUser(user)
 }
 
+const MaxTransferLimit = 10000.00
+const TransferFeePercent = 0.01
+const FixedTransferFee = 5.00
+
 func (s *service) Transfer(ctx context.Context, transfer TransferDTO) error {
-	log.Printf("Transferência: remetente=%s, destinatário=%s, valor=%f",
-		transfer.FromID, transfer.ToID, transfer.Amount)
 	if transfer.Amount <= 0 {
 		return errors.New("valor da transferência deve ser maior que zero")
+	}
+
+	// Verificar se as moedas são diferentes
+	if transfer.FromCurrency != transfer.ToCurrency {
+		convertedAmount, err := s.currencyService.Convert(ctx, transfer.Amount, transfer.FromCurrency, transfer.ToCurrency)
+		if err != nil {
+			return errors.New("erro na conversão de moeda")
+		}
+
+		transfer.Amount = convertedAmount
 	}
 
 	// Buscar o remetente
@@ -54,13 +70,11 @@ func (s *service) Transfer(ctx context.Context, transfer TransferDTO) error {
 	toUser.Balance += transfer.Amount
 
 	// Persistir as alterações
-	err = s.repo.Update(ctx, fromUser)
-	if err != nil {
+	if err := s.repo.Update(ctx, fromUser); err != nil {
 		return errors.New("erro ao atualizar saldo do remetente")
 	}
 
-	err = s.repo.Update(ctx, toUser)
-	if err != nil {
+	if err := s.repo.Update(ctx, toUser); err != nil {
 		return errors.New("erro ao atualizar saldo do destinatário")
 	}
 

@@ -11,6 +11,7 @@ type Config struct {
 	Database       string
 	CollectionName string
 	ServerPort     string
+	JWTSecret      string
 }
 
 func LoadConfig() Config {
@@ -25,5 +26,6 @@ func LoadConfig() Config {
 		Database:       viper.GetString("DATABASE_NAME"),
 		CollectionName: viper.GetString("USERS_COLLECTION"),
 		ServerPort:     viper.GetString("SERVER_PORT"),
+		JWTSecret:      viper.GetString("JWT_SECRET"),
 	}
 }

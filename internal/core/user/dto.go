@@ -8,7 +8,9 @@ type CreateUserDTO struct {
 }
 
 type TransferDTO struct {
-	FromID string  `json:"from_id"` // ID do remetente
-	ToID   string  `json:"to_id"`   // ID do destinatário
-	Amount float64 `json:"amount"`  // Valor da transferência
+	FromID       string  `json:"from_id"`
+	ToID         string  `json:"to_id"`
+	Amount       float64 `json:"amount"`
+	FromCurrency string  `json:"from_currency"` // Moeda do remetente
+	ToCurrency   string  `json:"to_currency"`   // Moeda do destinatário
 }
